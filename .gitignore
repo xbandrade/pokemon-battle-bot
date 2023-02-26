@@ -1,0 +1,6 @@
+sprites/
+json/
+__pycache__/
+*cache/
+venv/
+.env
