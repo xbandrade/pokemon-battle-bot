@@ -79,45 +79,60 @@ def run():
             logger.warning(f'Something went wrong! - CustomView Class')
             return
         async def move1_callback(interaction):
+            content = f'`{pokemon1.title()} used {view.move1.name}!'
             view.move1.current_pp -= 1
             view.move1.update_label()
             view.check_power_points()
+            messages = view.calculate_damage(me, opponent, me.move1)
             if view.struggle:
                 view.struggle.callback = struggle_callback
+            for msg in messages:
+                content += f'\n{msg}'
             await interaction.response.edit_message(
-                content=f'{pokemon1.title()} used {view.move1.name}!',
+                content=content + '`',
                 view=view
             )
-            # await send_message(interaction, pokemon1, pokemon2, pokedex, view)
 
         async def move2_callback(interaction):
+            content = f'`{pokemon1.title()} used {view.move2.name}!'
             view.move2.current_pp -= 1
             view.move2.update_label()
             view.check_power_points()
+            messages = view.calculate_damage(me, opponent, me.move2)
             if view.struggle:
                 view.struggle.callback = struggle_callback
+            for msg in messages:
+                content += f'\n{msg}'
             await interaction.response.edit_message(
-                content=f'{pokemon1.title()} used {view.move2.name}!',
+                content=content + '`',
                 view=view
             )
         async def move3_callback(interaction):
+            content = f'`{pokemon1.title()} used {view.move3.name}!'
             view.move3.current_pp -= 1
             view.move3.update_label()
             view.check_power_points()
+            messages = view.calculate_damage(me, opponent, me.move3)
             if view.struggle:
                 view.struggle.callback = struggle_callback
+            for msg in messages:
+                content += f'\n{msg}'
             await interaction.response.edit_message(
-                content=f'{pokemon1.title()} used {view.move3.name}!',
+                content=content + '`',
                 view=view
             )
         async def move4_callback(interaction):
+            content = f'`{pokemon1.title()} used {view.move4.name}!'
             view.move4.current_pp -= 1
             view.move4.update_label()
             view.check_power_points()
+            messages = view.calculate_damage(me, opponent, me.move4)
             if view.struggle:
                 view.struggle.callback = struggle_callback
+            for msg in messages:
+                content += f'\n{msg}'
             await interaction.response.edit_message(
-                content=f'{pokemon1.title()} used {view.move4.name}!',
+                content=content + '`',
                 view=view
             )
         async def runaway_callback(interaction):

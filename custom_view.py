@@ -3,8 +3,10 @@ import random
 import discord
 from discord.ui import Button, View
 
+from utils.damage_calc import calc
 
-class PokemonMove(Button):
+
+class PokemonMoveButton(Button):
     def __init__(self, move, pp, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.name = kwargs.get('label', '')
@@ -24,6 +26,24 @@ class PokemonMove(Button):
             if self.name not in ('Run Away', 'Struggle') else ''
         self._underlying.label = f'{self.name}' + curr_pp
 
+
+class HealthBar(Button):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def update_style(self):
+        self._underlying.style = discord.ButtonStyle.danger
+
+    def update_hp(self, pokemon):
+        percentage = round(pokemon.current_hp / pokemon.max_hp * 100, 1)
+        if percentage <= .25:
+            self.update_style()
+        self._underlying.label = (
+            f"Lv. {pokemon.level} {pokemon.name}'s HP: {pokemon.current_hp}/{pokemon.max_hp} "
+            f"[{percentage}%]"
+        )
+
+
 class CustomView(View):
     def __init__(self, pokemon1, pokemon2, learnsets, moves, *, timeout=180):
         super().__init__(timeout=timeout)
@@ -39,6 +59,30 @@ class CustomView(View):
         self.create_health_bar(pokemon1, pokemon2)
         self.create_move_buttons()
         self.add_view_buttons()
+
+    def calculate_damage(self, pokemon1, pokemon2, move):
+        damage, messages = calc(pokemon1, pokemon2, move)
+        pokemon2.current_hp -= damage
+        messages += self.update_health_bar(pokemon1, pokemon2)
+        return messages
+
+    
+    def update_health_bar(self, pokemon1, pokemon2):
+        if pokemon1.current_hp <= 0:
+            self.lock_moves()
+            pokemon1.current_hp = 0
+            self.my_hp.update_hp(pokemon1)
+            return [f"{pokemon1} fainted!", f"You've been defeated by {pokemon2}!"]
+        if pokemon2.current_hp <= 0:
+            self.lock_moves()
+            pokemon2.current_hp = 0
+            self.opponent_hp.update_hp(pokemon2)
+            return [f'{pokemon2} fainted!', 'Victory!']
+        self.my_hp.update_hp(pokemon1)
+        self.opponent_hp.update_hp(pokemon2)
+        return []
+
+
 
     def lock_moves(self):
         self.move1.disable_move()
@@ -56,7 +100,7 @@ class CustomView(View):
             self.move3.current_pp == 0 and
             self.move4.current_pp == 0
         ):
-            self.struggle = PokemonMove(
+            self.struggle = PokemonMoveButton(
                 label='Struggle',
                 emoji='👊🏽',
                 row=1,
@@ -66,51 +110,51 @@ class CustomView(View):
             self.add_item(self.struggle)
         
     def create_health_bar(self, pokemon1, pokemon2):
-        self.my_hp = Button(
-            label=f"{pokemon1.name}'s HP: [{pokemon1.current_hp}/{pokemon1.max_hp}] " 
+        self.my_hp = HealthBar(
+            label=f"Lv. {pokemon2.level} {pokemon1.name}'s HP: {pokemon1.current_hp}/{pokemon1.max_hp} " 
                   f"[{pokemon1.current_hp // pokemon1.max_hp * 100}%]", 
-            style=discord.ButtonStyle.green, emoji='🦄',
+            style=discord.ButtonStyle.green,
             disabled=True,
             row=0
         )
-        self.opponent_hp = Button(
-            label=f"{pokemon2.name}'s HP: [{pokemon2.current_hp}/{pokemon2.max_hp}] " 
+        self.opponent_hp = HealthBar(
+            label=f"Lv. {pokemon2.level} {pokemon2.name}'s HP: {pokemon2.current_hp}/{pokemon2.max_hp} " 
                   f"[{pokemon2.current_hp // pokemon2.max_hp * 100}%]", 
-            style=discord.ButtonStyle.green, emoji='🦄',
+            style=discord.ButtonStyle.green,
             disabled=True,
             row=0
         )
 
     def create_move_buttons(self):
-        self.move1 = PokemonMove(
-            label=self.my_pokemon.move1[0],
+        self.move1 = PokemonMoveButton(
+            label=self.my_pokemon.move1.name,
             emoji='➡️',
             row=1,
-            pp=self.my_pokemon.move1[1],
-            move=self.my_pokemon.move1[2]
+            pp=self.my_pokemon.move1.max_pp,
+            move=self.my_pokemon.move1.slug
         )
-        self.move2 = PokemonMove(
-            label=self.my_pokemon.move2[0],
+        self.move2 = PokemonMoveButton(
+            label=self.my_pokemon.move2.name,
             emoji='➡️',
             row=2,
-            pp=self.my_pokemon.move2[1],
-            move=self.my_pokemon.move2[2]
+            pp=self.my_pokemon.move2.max_pp,
+            move=self.my_pokemon.move2.slug
         )
-        self.move3 = PokemonMove(
-            label=self.my_pokemon.move3[0],
+        self.move3 = PokemonMoveButton(
+            label=self.my_pokemon.move3.name,
             emoji='➡️',
             row=3,
-            pp=self.my_pokemon.move3[1],
-            move=self.my_pokemon.move3[2]
+            pp=self.my_pokemon.move3.max_pp,
+            move=self.my_pokemon.move3.slug
         )
-        self.move4 = PokemonMove(
-            label=self.my_pokemon.move4[0],
+        self.move4 = PokemonMoveButton(
+            label=self.my_pokemon.move4.name,
             emoji='➡️',
             row=4,
-            pp=self.my_pokemon.move4[1],
-            move=self.my_pokemon.move4[2]
+            pp=self.my_pokemon.move4.max_pp,
+            move=self.my_pokemon.move4.slug
         )
-        self.run_away = PokemonMove(
+        self.run_away = PokemonMoveButton(
             label='Run Away',
             emoji='🚶🏽',
             row=0,
