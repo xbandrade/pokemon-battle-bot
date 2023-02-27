@@ -13,6 +13,7 @@ class PokemonMoveButton(Button):
         self.move = move
         self.max_pp = pp
         self.current_pp = pp
+        self.id = self._row - 1
         self.update_label()
 
     def disable_move(self):
@@ -25,6 +26,7 @@ class PokemonMoveButton(Button):
         curr_pp = f' [ {self.current_pp}/{self.max_pp} ]' \
             if self.name not in ('Run Away', 'Struggle') else ''
         self._underlying.label = f'{self.name}' + curr_pp
+    
 
 
 class HealthBar(Button):
@@ -45,11 +47,12 @@ class HealthBar(Button):
 
 
 class CustomView(View):
-    def __init__(self, pokemon1, pokemon2, learnsets, moves, *, timeout=180):
+    def __init__(self, pokemon1, pokemon2, *, timeout=180):
         super().__init__(timeout=timeout)
         self.my_hp = None
         self.opponent_hp = None
         self.my_pokemon = pokemon1
+        self.opponent = pokemon2
         self.move1 = None
         self.move2 = None
         self.move3 = None
@@ -105,7 +108,10 @@ class CustomView(View):
                 emoji='👊🏽',
                 row=1,
                 pp=float('inf'),
-                move='struggle'
+                move='struggle',
+                view=self,
+                pokemon1=self.my_pokemon,
+                pokemon2=self.opponent,
             )
             self.add_item(self.struggle)
         
@@ -131,28 +137,28 @@ class CustomView(View):
             emoji='➡️',
             row=1,
             pp=self.my_pokemon.move1.max_pp,
-            move=self.my_pokemon.move1.slug
+            move=self.my_pokemon.move1.slug,
         )
         self.move2 = PokemonMoveButton(
             label=self.my_pokemon.move2.name,
             emoji='➡️',
             row=2,
             pp=self.my_pokemon.move2.max_pp,
-            move=self.my_pokemon.move2.slug
+            move=self.my_pokemon.move2.slug,
         )
         self.move3 = PokemonMoveButton(
             label=self.my_pokemon.move3.name,
             emoji='➡️',
             row=3,
             pp=self.my_pokemon.move3.max_pp,
-            move=self.my_pokemon.move3.slug
+            move=self.my_pokemon.move3.slug,
         )
         self.move4 = PokemonMoveButton(
             label=self.my_pokemon.move4.name,
             emoji='➡️',
             row=4,
             pp=self.my_pokemon.move4.max_pp,
-            move=self.my_pokemon.move4.slug
+            move=self.my_pokemon.move4.slug,
         )
         self.run_away = PokemonMoveButton(
             label='Run Away',
