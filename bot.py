@@ -183,9 +183,9 @@ def run():
                 f'\x1b[31m{interaction.user}\x1b[0m : ({interaction.channel})'
             )
             await send_message(interaction, pokemon1, pokemon2, pokedex, view)
-        except (TypeError, discord.errors.NotFound):
+        except (TypeError, discord.errors.NotFound, discord.app_commands.errors.CommandInvokeError):
             logger.info(
-                f'\x1b[31m{interaction.user}\x1b[0m : Could not find this pokémon!'
+                f'\x1b[31m{interaction.user}\x1b[0m : Error in Random Battle!'
             )
             await interaction.followup.send(
                 '`Something went wrong!`'
@@ -209,7 +209,7 @@ def run():
                 f'\x1b[31m{interaction.user}\x1b[0m : ({interaction.channel})'
             )
             await send_message(interaction, pokemon1, pokemon2, pokedex, view)
-        except (TypeError, discord.errors.NotFound):
+        except (TypeError, discord.errors.NotFound, discord.app_commands.errors.CommandInvokeError):
             logger.info(
                 f'\x1b[31m{interaction.user}\x1b[0m : Could not find this pokémon!'
             )
@@ -217,6 +217,45 @@ def run():
                 '`Something went wrong!`'
             )
 
+
+    @client.tree.command(
+            name='moveinfo', 
+            description='Get some info about a pokémon move!'
+    )
+    async def move_info(interaction, *, move_name: str):
+        if interaction.user == client.user:
+            return
+        try:
+            move_name = move_name.lower().replace(' ', '').replace('-', '')
+            if move_name not in moves:
+                logger.info(
+                    f'\x1b[31m{interaction.user}\x1b[0m : Could not find this move!'
+                )
+                await interaction.response.send_message(
+                    f'`{move_name.title()} - Move not found!`'
+                )
+                return
+            mv = moves[move_name]
+            content = f'➡️ Move: {mv.get("name", "")}\n'
+            content += f'➡️ Type: {mv.get("type", "")}\n'
+            content += f'➡️ Description: {mv.get("desc", "")}\n'
+            content += f'➡️ Base Power: {mv.get("basePower", 0)}\n'
+            content += f'➡️ Category: {mv.get("category", "")}\n'
+            content += f'➡️ PP: {mv.get("pp", 0)}\n'
+            priority = mv.get("priority", 0)
+            if priority != 0:
+                content += f'➡️ Priority: {priority}'
+            logger.info(
+                f'\x1b[31m{interaction.user}\x1b[0m : {mv["name"]} found!'
+            )
+            await interaction.response.send_message('```' + content + '```')
+        except discord.app_commands.errors.CommandInvokeError:            
+            logger.warning(
+                f'\x1b[31m{interaction.user}\x1b[0m : Error in move selection!'
+            )
+            await interaction.response.send_message(
+                '`Something went wrong!`'
+            )
 
 
     TOKEN = os.getenv('DISCORD_BOT_TOKEN')
