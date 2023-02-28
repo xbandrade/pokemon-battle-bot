@@ -27,7 +27,7 @@ class Pokemon:
         self.def_ = self.calculate_stats(self.base_def, 2)
         self.spa = self.calculate_stats(self.base_spa, 3)
         self.spd = self.calculate_stats(self.base_spd, 4)
-        self.spd = self.calculate_stats(self.base_spe, 5)
+        self.spe = self.calculate_stats(self.base_spe, 5)
         self.status = 'normal'
         self.crit_base = 0
         self.front_sprite = get_pokemon_sprite(self.pokedex_number, True)
@@ -55,6 +55,7 @@ class PokemonMove:
     def __init__(self, slug, data):
         self.name = data['name']
         self.max_pp = data['pp']
+        self.current_pp = data['pp']
         self.accuracy = data['accuracy']
         self.slug = slug
         self.power = data['basePower']

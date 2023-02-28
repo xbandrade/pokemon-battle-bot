@@ -3,6 +3,7 @@ import random
 import discord
 from discord.ui import Button, View
 
+from bot_play import bot_moves
 from utils.damage_calc import calc
 
 
@@ -28,7 +29,6 @@ class PokemonMoveButton(Button):
         self._underlying.label = f'{self.name}' + curr_pp
     
 
-
 class HealthBar(Button):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -38,7 +38,7 @@ class HealthBar(Button):
 
     def update_hp(self, pokemon):
         percentage = round(pokemon.current_hp / pokemon.max_hp * 100, 1)
-        if percentage <= .25:
+        if percentage <= 25:
             self.update_style()
         self._underlying.label = (
             f"Lv. {pokemon.level} {pokemon.name}'s HP: {pokemon.current_hp}/{pokemon.max_hp} "
@@ -47,7 +47,7 @@ class HealthBar(Button):
 
 
 class CustomView(View):
-    def __init__(self, pokemon1, pokemon2, *, timeout=180):
+    def __init__(self, pokemon1, pokemon2, *, mode='random', timeout=180):
         super().__init__(timeout=timeout)
         self.my_hp = None
         self.opponent_hp = None
@@ -57,6 +57,7 @@ class CustomView(View):
         self.move2 = None
         self.move3 = None
         self.move4 = None
+        self.mode = mode
         self.struggle = None
         self.run_away = None
         self.create_health_bar(pokemon1, pokemon2)
@@ -64,11 +65,34 @@ class CustomView(View):
         self.add_view_buttons()
 
     def calculate_damage(self, pokemon1, pokemon2, move):
-        damage, messages = calc(pokemon1, pokemon2, move)
-        pokemon2.current_hp -= damage
-        messages += self.update_health_bar(pokemon1, pokemon2)
+        messages = []
+        if pokemon1.spe >= pokemon2.spe:
+            messages += [f'{pokemon1} used {move}!']
+            damage, msg = calc(pokemon1, pokemon2, move)
+            messages += msg
+            pokemon2.current_hp -= damage
+            messages += self.update_health_bar(pokemon1, pokemon2)
+            if pokemon2.current_hp > 0:
+                opponent_move = bot_moves(pokemon1, pokemon2, mode=self.mode)
+                messages += [f'{pokemon2} used {opponent_move}!']
+                damage, msg = calc(pokemon2, pokemon1, opponent_move)
+                messages += msg
+                pokemon1.current_hp -= damage
+                messages += self.update_health_bar(pokemon1, pokemon2)
+        else:
+            opponent_move = bot_moves(pokemon1, pokemon2, mode=self.mode)
+            messages += [f'{pokemon2} used {opponent_move}!']
+            damage, msg = calc(pokemon2, pokemon1, opponent_move)
+            messages += msg
+            pokemon1.current_hp -= damage
+            messages += self.update_health_bar(pokemon1, pokemon2)
+            if pokemon1.current_hp > 0:
+                messages += [f'{pokemon1} used {move}!']
+                damage, msg = calc(pokemon1, pokemon2, move)
+                messages += msg
+                pokemon2.current_hp -= damage
+                messages += self.update_health_bar(pokemon1, pokemon2)
         return messages
-
     
     def update_health_bar(self, pokemon1, pokemon2):
         if pokemon1.current_hp <= 0:
@@ -84,8 +108,6 @@ class CustomView(View):
         self.my_hp.update_hp(pokemon1)
         self.opponent_hp.update_hp(pokemon2)
         return []
-
-
 
     def lock_moves(self):
         self.move1.disable_move()

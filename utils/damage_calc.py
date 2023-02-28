@@ -38,7 +38,7 @@ def get_stats(pokemon1, pokemon2, move):
 def calc(pokemon1, pokemon2, move):
     messages = []
     if move.power == 0 and move.category == 'Status':
-        return (0, messages)
+        return (0, ['[-0 HP] [-0%]'])
     targets = 1
     parental_bond = 1
     weather = 1
@@ -53,12 +53,15 @@ def calc(pokemon1, pokemon2, move):
     damage = (((((2 * pokemon1.level) / 5 + 2) * move.power * ad) / 50) + 2)
     multipliers = targets * parental_bond * weather * glaive_rush * critical * rand * stab * type * burn * other
     final_damage = max(1, floor(damage * multipliers)) if move.category != 'Status' and type > 0 else 0
+    percentage_damage = f'-{min(100, round(final_damage / pokemon2.max_hp * 100, 1))}%'
     if type >= 2:
-        messages.append(f"It's super effective! [-{final_damage} HP]")
+        messages.append(f"It's super effective! [-{final_damage} HP] [{percentage_damage}]")
     elif 0 < type < 1:
-        messages.append(f"It's not very effective! [-{final_damage} HP]")
+        messages.append(f"It's not very effective! [-{final_damage} HP] [{percentage_damage}]")
     elif type == 0:
-        messages.append(f"It has no effect on {pokemon2}! [-0 HP]")
+        messages.append(f"It has no effect on {pokemon2}! [-0 HP] [-0%]")
     else:
-        messages.append(f"[-{final_damage} HP]")
+        messages.append(
+            f"[-{final_damage} HP] [-{min(100, round(final_damage / pokemon2.max_hp * 100, 1))}%]"
+        )
     return (final_damage, messages)

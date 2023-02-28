@@ -69,7 +69,7 @@ def run():
 
     async def view_callbacks(view, me, opponent):
         async def move1_callback(interaction):
-            content = f'`{me} used {view.move1.name}!'
+            content = f'`{me} x {opponent}'
             view.move1.current_pp -= 1
             view.move1.update_label()
             view.check_power_points()
@@ -83,7 +83,7 @@ def run():
                 view=view
             )
         async def move2_callback(interaction):
-            content = f'`{me} used {view.move2.name}!'
+            content = f'`{me} x {opponent}'
             view.move2.current_pp -= 1
             view.move2.update_label()
             view.check_power_points()
@@ -97,7 +97,7 @@ def run():
                 view=view
             )
         async def move3_callback(interaction):
-            content = f'`{me} used {view.move3.name}!'
+            content = f'`{me} x {opponent}'
             view.move3.current_pp -= 1
             view.move3.update_label()
             view.check_power_points()
@@ -111,7 +111,7 @@ def run():
                 view=view
             )
         async def move4_callback(interaction):
-            content = f'`{me} used {view.move4.name}!'
+            content = f'`{me} x {opponent}'
             view.move4.current_pp -= 1
             view.move4.update_label()
             view.check_power_points()
@@ -145,14 +145,17 @@ def run():
         view.run_away.callback = runaway_callback
 
 
-    @client.tree.command(name='battle', description='Start a pokémon battle!')
+    @client.tree.command(
+            name='battle', 
+            description='Challenge the bot to a battle using the selected pokémon!'
+    )
     async def battle(interaction, *, pokemon1: str, pokemon2: str):
         if interaction.user == client.user:
             return
         if pokemon1 in pokedex and pokemon2 in pokedex:
             me = Pokemon(pokemon1, pokedex[pokemon1], learnsets[pokemon1]['learnset'], moves)
             opponent = Pokemon(pokemon2, pokedex[pokemon2], learnsets[pokemon2]['learnset'], moves)
-            view = CustomView(me, opponent, timeout=360)
+            view = CustomView(me, opponent, mode='smart', timeout=360)
         else:
             logger.warning(f'Something went wrong! - CustomView Class')
             return
@@ -163,11 +166,14 @@ def run():
         await send_message(interaction, pokemon1, pokemon2, pokedex, view)
 
     
-    @client.tree.command(name='random', description='Start a random pokémon battle!')
+    @client.tree.command(
+            name='random', 
+            description='Challenge the bot to a random battle. The bot uses moves randomly!'
+    )
     async def random_battle(interaction):
         if interaction.user == client.user:
             return
-        pokemon1, pokemon2 = random.choices(list(pokedex.keys()), k=2)
+        pokemon1, pokemon2 = random.choices(list(learnsets.keys()), k=2)
         try:
             me = Pokemon(pokemon1, pokedex[pokemon1], learnsets[pokemon1]['learnset'], moves)
             opponent = Pokemon(pokemon2, pokedex[pokemon2], learnsets[pokemon2]['learnset'], moves)
@@ -177,7 +183,33 @@ def run():
                 f'\x1b[31m{interaction.user}\x1b[0m : ({interaction.channel})'
             )
             await send_message(interaction, pokemon1, pokemon2, pokedex, view)
-        except:
+        except (TypeError, discord.errors.NotFound):
+            logger.info(
+                f'\x1b[31m{interaction.user}\x1b[0m : Could not find this pokémon!'
+            )
+            await interaction.followup.send(
+                '`Something went wrong!`'
+            )
+    
+
+    @client.tree.command(
+            name='smart', 
+            description='Challenge the bot to a random battle. The bot uses the best possible moves!'
+    )
+    async def random_smart(interaction):
+        if interaction.user == client.user:
+            return
+        pokemon1, pokemon2 = random.choices(list(learnsets.keys()), k=2)
+        try:
+            me = Pokemon(pokemon1, pokedex[pokemon1], learnsets[pokemon1]['learnset'], moves)
+            opponent = Pokemon(pokemon2, pokedex[pokemon2], learnsets[pokemon2]['learnset'], moves)
+            view = CustomView(me, opponent, mode='smart', timeout=360)
+            await view_callbacks(view, me, opponent)
+            logger.info(
+                f'\x1b[31m{interaction.user}\x1b[0m : ({interaction.channel})'
+            )
+            await send_message(interaction, pokemon1, pokemon2, pokedex, view)
+        except (TypeError, discord.errors.NotFound):
             logger.info(
                 f'\x1b[31m{interaction.user}\x1b[0m : Could not find this pokémon!'
             )
