@@ -201,8 +201,8 @@ def run():
             return
         pokemon1, pokemon2 = random.choices(list(learnsets.keys()), k=2)
         try:
-            me = Pokemon(pokemon1, pokedex[pokemon1], learnsets[pokemon1]['learnset'], moves)
-            opponent = Pokemon(pokemon2, pokedex[pokemon2], learnsets[pokemon2]['learnset'], moves)
+            me = Pokemon(pokemon1, pokedex[pokemon1], learnsets[pokemon1].get('learnset', {}), moves)
+            opponent = Pokemon(pokemon2, pokedex[pokemon2], learnsets[pokemon2].get('learnset', {}), moves)
             view = CustomView(me, opponent, mode='smart', timeout=360)
             await view_callbacks(view, me, opponent)
             logger.info(
@@ -257,6 +257,19 @@ def run():
                 '`Something went wrong!`'
             )
 
+    @client.tree.command(
+            name='help', 
+            description='Display a list of available commands'
+    )
+    async def help(interaction):
+        content = '❕myuBot Help❕\n\n'
+        content += '➡️ /battle [pokemon1] [pokemon2] - Challenge the bot using the selected pokémon\n\n'
+        content += '➡️ /random - Challenge the bot to a battle with randomly selected pokémon.\n The bot will use moves randomly\n\n'
+        content += '➡️ /smart - Challenge the bot to a battle with randomly selected pokémon.\n The bot will use the best possible moves against your pokémon\n\n'
+        content += '➡️ /moveinfo [move_name] - Display information about a move\n'
+        await interaction.response.send_message(
+            '```' + content + '```'
+        )
 
     TOKEN = os.getenv('DISCORD_BOT_TOKEN')
     client.run(TOKEN)
