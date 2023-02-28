@@ -147,7 +147,7 @@ def run():
 
     @client.tree.command(
             name='battle', 
-            description='Challenge the bot to a battle using the selected pokémon!'
+            description='Challenge the bot to a battle using selected pokémon!'
     )
     async def battle(interaction, *, pokemon1: str, pokemon2: str):
         if interaction.user == client.user:

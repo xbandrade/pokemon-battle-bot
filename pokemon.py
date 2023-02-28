@@ -32,12 +32,25 @@ class Pokemon:
         self.crit_base = 0
         self.front_sprite = get_pokemon_sprite(self.pokedex_number, True)
         self.back_sprite = get_pokemon_sprite(self.pokedex_number, False)
-        self.move1, self.move2, self.move3, self.move4 = self.create_moveset(moves)
+        self.move1, self.move2, self.move3, self.move4 = self.create_moveset(moves, damage_only=True)
         
     def __str__(self) -> str:
         return self.name
 
-    def create_moveset(self, moves):
+    def create_moveset(self, moves, damage_only=False):
+        if damage_only:
+            moveset = []
+            while len(moveset) < 4:
+                new_move = random.choice(list(self.learnset.keys()))
+                if new_move in moveset:
+                    break
+                if new_move in moves and moves[new_move]['basePower'] > 0:
+                    moveset.append(new_move)
+            if len(moveset) < 4:
+                moveset += random.choices(list(self.learnset.keys()), k=4 - len(moveset))
+            return [
+                PokemonMove(slug=moveset[i], data=moves[moveset[i]]) for i in range(4)
+            ]
         moveset = random.choices(list(self.learnset.keys()), k=4)
         return [
             PokemonMove(slug=moveset[i], data=moves[moveset[i]]) for i in range(4)
