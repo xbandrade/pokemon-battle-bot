@@ -14,9 +14,9 @@
 <img src="https://raw.githubusercontent.com/xbandrade/pokemon-battle-bot/main/img/battle.png" width=48% height=48%> <img src="https://raw.githubusercontent.com/xbandrade/pokemon-battle-bot/main/img/smart.png" width=45% height=45%>
 
 ## Slash Commands
-* `/battle [pokemon1] [pokemon2]` - Challenge the bot using the selected pokémon
-* `/random` - Challenge the bot to a battle with randomly selected pokémon. The bot will use moves randomly
-* `/smart` - Challenge the bot to a battle with randomly selected pokémon. The bot will use the best possible moves against your pokémon
+* `/battle [pokemon1] [pokemon2]` - Challenge the bot to a 1v1 pokémon battle using the selected pokémon
+* `/random` - Challenge the bot to a 1v1 battle with randomly selected pokémon. The bot will use moves randomly
+* `/smart` - Challenge the bot to a 1v1 battle with randomly selected pokémon. The bot will use the best possible moves against your pokémon
 * `/moveinfo [move_name]` - Display information about a move
 
 <img src="https://github.com/xbandrade/pokemon-battle-bot/blob/main/img/move.png" width=70% height=70%>
