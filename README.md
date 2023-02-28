@@ -23,4 +23,4 @@
 
 #### The bot edits and updates its own message and view buttons, so it won't spam messages on every used move.
 
-#### All pokémon and moves data were obtained from Pokémon Showdown's Pokédex.
+#### All pokémon and moves data were obtained from Pokémon Showdown's Pokédex: [sprites](https://play.pokemonshowdown.com/sprites/), [pokémon data](https://play.pokemonshowdown.com/data/). Information about formulas for damage calculation was obtained from [Bulbapedia](https://bulbapedia.bulbagarden.net/wiki/Main_Page).
